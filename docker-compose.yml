@@ -7,7 +7,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/mydb
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/TEST
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=1234
     depends_on:
@@ -22,15 +22,17 @@ services:
       - backend
 
   db:
-    image: mysql:8
+    image: mysql:latest
     environment:
+      MYSQL_DATABASE: TEST
       MYSQL_ROOT_PASSWORD: 1234
-      MYSQL_DATABASE: mydb
+      TZ: Asia/Seoul
     ports:
       - "3307:3306"
     volumes:
       - db_data:/var/lib/mysql
-      - ./backend/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - ./my.cnf:/etc/mysql/cnf.d
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
 volumes:
   db_data:
