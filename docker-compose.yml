@@ -5,10 +5,11 @@ services:
     build:
       context: ./Final-back
     ports:
-      - "8080:8080"
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/TEST
-      - SPRING_DATASOURCE_PASSWORD=1234
+      - "${BACKEND_PORT:-8080}:8080"
+    env_file:
+      - .env
+    networks:
+      - dev-network
     depends_on:
       - db
 
@@ -16,21 +17,45 @@ services:
     build:
       context: ./Final-front
     ports:
-      - "3000:3000"
+      - "${FRONTEND_PORT:-3000}:3000"
+    env_file:
+      - .env
+    networks:
+      - dev-network
+    depends_on:
+      - backend
+
+  ml:
+    build:
+      context: ./Final-ml
+    ports:
+      - "${ML_PORT:-8000}:8000"
+    env_file:
+      - .env
+    networks:
+      - dev-network
     depends_on:
       - backend
 
   db:
-    image: mysql:latest
-    environment:
-      MYSQL_DATABASE: TEST
-      MYSQL_ROOT_PASSWORD: 1234
-      TZ: Asia/Seoul
+    image: mysql:8.0
     ports:
       - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: MONGEUL
+      MYSQL_USER: root
+      MYSQL_PASSWORD: 1234
+      MYSQL_ALLOW_EMPTY_PASSWORD: yes
     volumes:
       - db_data:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - dev-network
 
 volumes:
   db_data:
+
+networks:
+  dev-network:
+    driver: bridge
